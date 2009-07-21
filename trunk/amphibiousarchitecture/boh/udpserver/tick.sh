@@ -4,6 +4,8 @@
 # fake some data
 # jcl/nyu/2009-07-20
 
+# Subversion $Id$
+
 site=99
 ./udpsend 127.0.0.1 6000 "action=f1&site=$site&sensor=1&event=sms"
 

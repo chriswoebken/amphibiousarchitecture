@@ -2,6 +2,8 @@
 # database definitions
 # jcl/nyu/2009-07-19
 
+# Subversion $Id$
+
 # f1: food event
 #
 drop table if exists f1;

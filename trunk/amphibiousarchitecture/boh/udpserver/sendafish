@@ -4,6 +4,8 @@
 # send a fish message to ourselves
 # jcl/nyu/2009-07-17
 
+# Subversion $Id$
+
 ./udpsend 127.0.0.1 6000 'action=f2&site=1&sensor=2&nfish=6&weight=10&depth=100'
 
 # end
