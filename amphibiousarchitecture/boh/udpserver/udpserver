@@ -36,7 +36,8 @@ function putindb($s) {
 		if ($key == "action") {
 			$action = $val;
 		} else {
-			$items[$keyval[0]] = sprintf("'%s'", $keyval[1]);
+			$items[$keyval[0]] =
+				sprintf("'%s'", addslashes($keyval[1]));
 		}
 	}
 
