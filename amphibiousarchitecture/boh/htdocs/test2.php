@@ -9,7 +9,7 @@
 function dumptable($table) {
 	printf("<h2>%s</h2>", $table);
 
-	$sql = sprintf("select * from %s order by id desc limit 100", $table);
+	$sql = sprintf("select * from %s order by id desc limit 10", $table);
 
 	$res = mysql_query($sql);
 	if (!$res) {
