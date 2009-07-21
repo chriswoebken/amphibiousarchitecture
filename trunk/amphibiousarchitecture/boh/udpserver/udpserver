@@ -1,0 +1,150 @@
+#!/usr/bin/php
+<?php
+
+# udpserver
+# first php server test
+# jcl/environmental/2009-07-17
+
+# takes udp packets
+# inserts into database
+# config is in 'dbconfig.php'
+
+# == putindb
+#
+# takes a string in format "name=value&name=value..."
+# one of the names must be "action=tablename"
+# we insert into the database the name=value pairs
+# database is specified by the already-open mysql connection
+# table is specified by the action=tablename pair
+#
+# error is logged to syslog
+#
+function putindb($s) {
+	$action = "";
+
+	# we want our stamp to always be in utc
+	$items = array("stamp" => "utc_timestamp()");
+
+	$box = split("&", $s);
+	foreach ($box as $pair) {
+		$keyval = split("=", $pair);
+		$key = $keyval[0];
+		$val = $keyval[1];
+
+		if ($key == "action") {
+			$action = $val;
+		} else {
+			$items[$keyval[0]] = sprintf("'%s'", $keyval[1]);
+		}
+	}
+
+	# check we know what action we're doing
+	#
+	if ($action == "") {
+		syslog(LOG_ERR, "no 'action' in packet '$s'");
+		return;
+	}
+
+	# construct the sql
+	# 	insert into tablename set name=value, name=value;
+	#
+	$sql = sprintf("insert into %s set", $action);
+	$sep = " ";
+	foreach ($items as $key => $val) {
+		$sql .= sprintf("%s%s=%s",
+			$sep,
+			$key,
+			$val);
+		$sep = ",";
+	}
+
+	# execute the sql
+	#
+	$res = mysql_query($sql);
+	if (!$res) {
+		syslog(LOG_ERR,
+			sprintf("mysql error (%s) on '%s'",
+				 mysql_error(), $sql));
+	}
+}
+
+function main($port, $okpeers, $dbhost, $dbuser, $dbpass, $dbname) {
+	global $pid;
+
+	$skt = @stream_socket_server("udp://0.0.0.0:$port",
+		$errno, $errstr, STREAM_SERVER_BIND);
+	if (!$skt) {
+		syslog(LOG_ERR,
+	"$pid: failed to make socket on port $port: $errstr");
+		syslog(LOG_ERR, "$pid: exiting");
+		die("failed to make socket on port $port: $errstr\n");
+	}
+
+	$db = @mysql_connect($dbhost, $dbuser, $dbpass);
+	if (!$db) {
+		$msg = sprintf("mysql_connect error: %s", mysql_error());
+		syslog(LOG_ERR, "$pid: $msg");
+		syslog(LOG_ERR, "$pid: exiting");
+		die("$msg\n");
+	}
+	if (!@mysql_select_db($dbname)) {
+		$msg = sprintf("mysql_select_db error: %s", mysql_error());
+		syslog(LOG_ERR, "$pid: $msg");
+		syslog(LOG_ERR, "$pid: exiting");
+		die("$msg\n");
+	}
+
+	for (;;) {
+		# get the next packet
+		#
+		$pkt = stream_socket_recvfrom($skt, 1000, 0, $peer);
+
+		# find out who sent the packet
+		#
+		$addrport = split(":", $peer);
+		$peeraddr = $addrport[0];
+		$peerport = $addrport[1];
+
+		# check sender is in list of good senders
+		#
+		if (!in_array($peeraddr, $okpeers)) {
+			syslog(LOG_ERR,
+				sprintf("%d: ignoring %d byte packet from %s",
+					$pid, strlen($pkt), $peeraddr));
+			continue;
+		}
+
+		# fake the sender as a field in the packet
+		#
+		$pkt .= sprintf("&%s=%s", "srcaddr", $peeraddr);
+
+		# and log it
+		#
+		putindb($pkt);
+	}
+}
+
+# general startup
+#
+$pid = getmypid();
+
+# pick up database details
+#
+require_once("dbconfig.php");
+
+# pick up port and allowed client ip addresses from command line
+#	always allow localhost 127.0.0.1
+#
+$port = $argv[1];
+$addrs = array("127.0.0.1");
+for ($i = 2;  $i < $argc;  ++$i) {
+	$addrs[] = $argv[$i];
+}
+syslog(LOG_DEBUG, "$pid: server starting on port $port with allowed clients "
+		. implode(" ", $addrs));
+
+main($port, $addrs,
+	$dbhost, $dbuser, $dbpass, $dbname);
+
+# end
+?>
