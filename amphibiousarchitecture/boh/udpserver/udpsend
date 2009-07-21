@@ -1,0 +1,24 @@
+#!/usr/bin/php
+<?php
+
+# udpsend
+# send a udp packet
+# jcl/nyu/2009-07-17
+
+$skt = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+if (!$skt) {
+	printf("doom\n");
+	exit(1);
+}
+
+if ($argc != 4) {
+	printf("usage: %s host port message\n", $argv[0]);
+	exit(1);
+}
+$addr = $argv[1];
+$port = $argv[2];
+$msg = $argv[3];
+$res = socket_sendto($skt, $msg, strlen($msg), 0, $addr, $port);
+
+# end
+?>
