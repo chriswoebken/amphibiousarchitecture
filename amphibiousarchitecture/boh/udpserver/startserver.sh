@@ -4,6 +4,8 @@
 # how to run amphib arch udp server
 # jcl/nyu/2009-07-17
 
+# Subversion $Id$
+
 # first number is port we listen on
 # remainder are acceptable client ip addresses
 # output redirection jazz is disconnecting the output and run in background

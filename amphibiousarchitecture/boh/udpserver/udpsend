@@ -5,6 +5,8 @@
 # send a udp packet
 # jcl/nyu/2009-07-17
 
+# Subversion $Id$
+
 $skt = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 if (!$skt) {
 	printf("doom\n");
