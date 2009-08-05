@@ -1,4 +1,4 @@
-/* AA_InOutControl
+/* AA_InOutControl.pde
  * Processing 1.0.5, Mac Mini, D-Link router/switch, set of ethernet'd sensors
  * InOutControl has three goals: 1) receive senor inputs 2) process the inputs for light behavior 3) output behavior commands to the 16 tubes
  * ** UDP ** receive udp packets from sensors, parse the message, make message content available for light behavior, forward udp to boh
