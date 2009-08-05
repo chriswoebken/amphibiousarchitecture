@@ -10,7 +10,8 @@
 # remainder are acceptable client ip addresses
 # output redirection jazz is disconnecting the output and run in background
 #
-./udpserver 6000  216.165.95.70 217.155.120.114 > /dev/null 2>&1 &
+#./udpserver 6000  192.168.1.27 216.165.95.70 217.155.120.114 > /dev/null 2>&1 &
+./udpserver 6000  192.168.1.27 216.165.95.70 217.155.120.114 
 
 # check log to see if it started correctly
 #
