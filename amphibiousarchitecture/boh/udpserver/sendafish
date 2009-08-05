@@ -6,6 +6,6 @@
 
 # Subversion $Id$
 
-./udpsend 127.0.0.1 6000 'action=f2&site=1&sensor=2&nfish=6&weight=10&depth=100'
+./udpsend 192.168.0.29 12345 'action=f2&site=1&sensor=2&nfish=6&weight=10&depth=100'
 
 # end
