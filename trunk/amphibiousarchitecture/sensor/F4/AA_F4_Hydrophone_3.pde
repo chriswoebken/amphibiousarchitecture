@@ -2,6 +2,7 @@
  * Arduino 0016 with Arduino 2009 and Arduino Ethernet Shield
  * configure mac, ip, and router/gw; set target ip and port; send udp string
  * kcw/theliving/2009.07.20
+ * cwo/xClinic/2009.08.06
  */
 
 #include <Ethernet.h>
@@ -11,7 +12,10 @@
 int analogPin = 4;
 int volume = 0;
   char str[30];
-  int count;
+  int count; 
+int left = 8;  
+int middle = 9;
+int right = 10;
 
 // ETHERNET CONFIGURATION 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };   // MAC address to use
@@ -29,6 +33,29 @@ String asciiString;
 
 void setup() {
   Serial.begin(9600);
+  pinMode(left, OUTPUT);
+  pinMode(middle, OUTPUT); 
+  pinMode(right, OUTPUT);
+  digitalWrite(middle, HIGH); 
+  delay(1000);  
+  digitalWrite(middle, LOW);  
+  delay(1000);    
+  digitalWrite(left, HIGH); 
+  delay(3000);  
+  digitalWrite(left, LOW);  
+  delay(1000);   
+  digitalWrite(left, HIGH); 
+  delay(1000);
+  digitalWrite(left, LOW);  
+  delay(1000);
+  digitalWrite(left, HIGH); 
+  delay(1000);
+  digitalWrite(left, LOW);  
+  delay(1000); 
+  digitalWrite(right, HIGH); 
+  delay(1000);  
+  digitalWrite(right, LOW);  
+  delay(4000);   
   
   DDRC = 0xff;
   int nodeID = PINC;
