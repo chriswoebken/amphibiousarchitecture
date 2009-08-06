@@ -85,7 +85,7 @@ void draw() {
   }
 
   // -----------------------------------< generate random numbers for test >
- 
+
   float f = random(0,200); // -< random number for fish >
   if (f > 150){
     fishexist= 1;
@@ -177,7 +177,7 @@ void draw() {
       }
 
       String[] strsend = { 
-        levelTop[i][j].id , str(c), str(o)                               }; 
+        levelTop[i][j].id , str(c), str(o)                                     }; 
       String strDanceID = join(strsend,"");
       int send = int (strDanceID);
 
@@ -187,27 +187,16 @@ void draw() {
       else{
         flipOx = 0; 
       }
-
-      if (flipOx == 1){
+      if (trackledTop[i][j] != c){
         println(strDanceID);
         port.write(strDanceID);
-        delay (100);
       }
-      else{
-        if (trackledTop[i][j] != c){
-          println(strDanceID);
-         port.write(strDanceID);
-        }
-      }
-
 
       trackledTop[i][j] = c;
       delay (20);
     }
   }
-  if (flipOx == 1){
-        delay (2000);
-      }
+
 
   trackOxygen = oxygen;
   countDelay = countDelay+1;
@@ -318,7 +307,7 @@ class ledFixture {
 
 
 void FishPath(float beginX, float beginY,  float distX,  float distY){
-color c1Fish = color(255, 102, 0);
+  color c1Fish = color(255, 102, 0);
 
   if(pct == 0.0){
     beginX = xFishPath;
@@ -361,6 +350,7 @@ void keyPressed() {
     event = 0;
   }
 }
+
 
 
 
