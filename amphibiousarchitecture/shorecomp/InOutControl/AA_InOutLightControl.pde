@@ -11,15 +11,15 @@
 import processing.serial.*;
 Serial port;
 
-
 //define sensor variables
 int event;
 
 /****************************************************************************************** UDP ****/
-import hypermedia.net.*;
-import processing.serial.*;
-UDP udp;
-
+/*
+//import hypermedia.net.*;
+ import processing.serial.*;
+ UDP udp;
+ */
 int site = 0;       // these variable get filled in once a udp packet gets received and parsed
 int sensor = 0;     // if any of them remain at zero and get sent to boh, then:
 int volume = 0;     // sensor itself is reading a zero value, which should never happen
@@ -77,17 +77,17 @@ String d ;  //ID
 void setup() {
 
   port = new Serial(this, "COM17", 9600);  // -< serial setup >
-  
-  
-/***************************************************************************************** UDP ****/
 
+
+  /***************************************************************************************** UDP ****/
+  /*
   udp = new UDP( this, 6000 );                     // create a new datagram connection on port 6000
-  udp.log( true );                                 // printout the connection activity
-  udp.listen( true );                              // wait for incomming message
+   udp.log( true );                                 // printout the connection activity
+   udp.listen( true );                              // wait for incomming message
+   
+  /***************************************************************************************** END ****/
 
-/***************************************************************************************** END ****/
-  
-  
+
 
   // -----------------------------------< create display >
   size(600,600);
@@ -113,7 +113,7 @@ void draw() {
   }
 
   // -----------------------------------< generate random numbers for test >
-/*
+
   float f = random(0,200); // -< random number for fish >
   if (f > 150){
     fishexist= 1;
@@ -124,14 +124,14 @@ void draw() {
   if (fishexist == 1){
     nfish = nfish+1;
   }
-*/
+
   // -----------------------------------< get variables ready for functions >
   fishnumber = nfish;
-    if (dissox > 300 ){
-    oxygen = 0;
+  if (dissox > 300 ){
+    oxygen = 1;
   }
   if (dissox <= 300){
-    oxygen = 1;
+    oxygen = 0;
   }
   //oxygen = dissox;
 
@@ -168,7 +168,7 @@ void draw() {
       }
 
       //bottom led off, if fish detected create path and turn on due to proximity to path
-      if (count < (fishnumber) || pct > 0 ){
+      if (count != (fishnumber) || pct > 0 ){
         levelBot[i][j].FishRespond();
       }
       else {
@@ -180,6 +180,7 @@ void draw() {
       char a ;  //ledFixture: top
       char c ;  //ledFixture: bottom
       char o;   //dissolved oxygen
+      char e; // sms event
 
       if (levelTop[i][j].circolor == 0){ 
         a ='0';
@@ -210,8 +211,23 @@ void draw() {
         o = '0';
       }
 
+
+      if (event == 1){
+        e = '1';
+      }
+      else {
+        e = '0';
+      }
+
+
+
+
+
+
+
+
       String[] strsend = { 
-        levelTop[i][j].id , str(c), str(o)                                     }; 
+        levelTop[i][j].id , str(c), str(o) , str(e)                                          }; 
       String strDanceID = join(strsend,"");
       int send = int (strDanceID);
 
@@ -221,13 +237,14 @@ void draw() {
       else{
         flipOx = 0; 
       }
+      
       if (trackledTop[i][j] != c){
-        //println(strDanceID);
-        //port.write(strDanceID);
+        println(strDanceID);
+        port.write(strDanceID);
       }
 
       trackledTop[i][j] = c;
-      delay (20);
+      delay (40);
     }
   }
 
@@ -369,102 +386,107 @@ void FishPath(float beginX, float beginY,  float distX,  float distY){
 
 
 
-/*
+
 // -----------------------------------< manual input for variables >
 void keyPressed() {
   if (key == 'c'){
-    dissox = 0;
+    dissox = 200; //sending 0
   }
   if (key == 'w'){
-    dissox = 1;
+    dissox = 400; //sending 1
   }
   if (key == 'e'){
     event = 1;
   }
-  else {
+  if (key == 'r'){
     event = 0;
   }
 }
 
-*/
+
+
 
 
 
 /****************************************************************************************** UDP ****/
 
 /* ------------------------------------ for testing only -- */
+/*
 void keyPressed() {
-  // String message  = str( key );                                  // the message to send
-  String ip       = "92.243.23.29"; //"localhost";                  // the remote IP address
-  int port        = 34567;                                          // the destination port
-
-  String message = "action=f2&site=2&sensor=130&nfish=1";
-  udp.send( message, ip, port );                                    // send the message
-
-  if(message != null) {
-    println("key pressed: " + message);
-  }
-}
+ // String message  = str( key );                                  // the message to send
+ String ip       = "92.243.23.29"; //"localhost";                  // the remote IP address
+ int port        = 34567;                                          // the destination port
+ 
+ String message = "action=f2&site=2&sensor=130&nfish=1";
+ udp.send( message, ip, port );                                    // send the message
+ 
+ if(message != null) {
+ println("key pressed: " + message);
+ }
+ }
 /* ------------------------------------------------- end -- */
 
 
 
 /* ----------------------- do this when you get a packet -- */
+/*
 void receive( byte[] data, String ip, int port ) {                  // extended handler
-  // void receive( byte[] data ) {                                  // default handler
-
-  // data = subset(data, 0, data.length-1);
-  String message = new String( data );
-
-
-
-  /////////////////// send UDP to BOH ////
-  String bohIP = "92.243.23.29";
-  int bohPort  = 6000;
-  udp.send( message, bohIP, bohPort );
-  /////////////////////////////// end ////
-
-
-
-  /////////////////// see the packets ////
-  println( "receive: \""+message+"\" from "+ip+" on port "+port );
-
-  String[] list = split(message, "&");                             // split 'message' at each "&"
-                                                                   // put result in 'list'
-  for(int i = 0; i < list.length; i++) {                           // iterate through all of 'list'
-    String[] pair = split(list[i], "=");                           // split 'list' at each "="
-
-    if (pair[0].equals("site")) {                                  // if parsed packet (pair[0]) equals tag word that we expect
-      site = int(pair[1]);                                         // then set a variable equal to the following value (pair[1])
-    }
-    else if (pair[0].equals("sensor")) {                           // same as above
-      sensor = int(pair[1]);                                       // do it for every tag word we expect to get
-    }
-    else if (pair[0].equals("volume")) {
-      volume = int(pair[1]); 
-    }
-    else if (pair[0].equals("dissox")) {
-      dissox = int(pair[1]); 
-    }
-    else if (pair[0].equals("nfish")) {
-      nfish = int(pair[1]);
-    }
-    else if (pair[0].equals("weight")) {
-      weight = int(pair[1]);
-    }
-    else if (pair[0].equals("depth")) {
-      depth = int(pair[1]);
-    }
-  }
-
-  println("volume = " + volume);                                   // monitor how the packet values change
-  println("dissox = " + dissox);
-  println("nfish = " + nfish);
-  println();
-  /////////////////////////////// end ////
-}
+ // void receive( byte[] data ) {                                  // default handler
+ 
+ // data = subset(data, 0, data.length-1);
+ String message = new String( data );
+ 
+ 
+ 
+ /////////////////// send UDP to BOH ////
+ String bohIP = "92.243.23.29";
+ int bohPort  = 6000;
+ udp.send( message, bohIP, bohPort );
+ /////////////////////////////// end ////
+ 
+ 
+ 
+ /////////////////// see the packets ////
+ println( "receive: \""+message+"\" from "+ip+" on port "+port );
+ 
+ String[] list = split(message, "&");                             // split 'message' at each "&"
+ // put result in 'list'
+ for(int i = 0; i < list.length; i++) {                           // iterate through all of 'list'
+ String[] pair = split(list[i], "=");                           // split 'list' at each "="
+ 
+ if (pair[0].equals("site")) {                                  // if parsed packet (pair[0]) equals tag word that we expect
+ site = int(pair[1]);                                         // then set a variable equal to the following value (pair[1])
+ }
+ else if (pair[0].equals("sensor")) {                           // same as above
+ sensor = int(pair[1]);                                       // do it for every tag word we expect to get
+ }
+ else if (pair[0].equals("volume")) {
+ volume = int(pair[1]); 
+ }
+ else if (pair[0].equals("dissox")) {
+ dissox = int(pair[1]); 
+ }
+ else if (pair[0].equals("nfish")) {
+ nfish = int(pair[1]);
+ }
+ else if (pair[0].equals("weight")) {
+ weight = int(pair[1]);
+ }
+ else if (pair[0].equals("depth")) {
+ depth = int(pair[1]);
+ }
+ }
+ 
+ println("volume = " + volume);                                   // monitor how the packet values change
+ println("dissox = " + dissox);
+ println("nfish = " + nfish);
+ println();
+ /////////////////////////////// end ////
+ }
+ */
 /* ------------------------------------------------- end -- */
 /****************************************************************************************** END ****/
+
 
 
 
