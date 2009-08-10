@@ -35,11 +35,6 @@ int localPort = 8888;                                  // local port to listen o
 byte targetIp[] = { 192, 168, 0, 2};
 int targetPort = 6000;
 
-
-// Strings hold the packets we want to send
-String asciiString;  
-String otherString; 
-
 void setup() {
   Serial.begin(9600);
   
@@ -66,9 +61,10 @@ void loop() {
   Serial.print("dissox string: ");
   Serial.println(strDissox);
 
-  String asciiString = "action=f3&site=2&sensor=66&dissox=";
+  // Strings hold the packets we want to send
+  String asciiString = "action=f3&site=2&sensor=66&dissox=";  // 34
 
-  String otherString = String(maxLength);
+  String otherString;
 
   otherString.append(asciiString); 
   otherString.append(strDissox); 

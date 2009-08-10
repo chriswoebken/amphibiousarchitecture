@@ -30,7 +30,6 @@ int left = 8;
 int middle = 9;
 int right = 10;
 
-
 // ETHERNET CONFIGURATION 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };   // MAC address to use
 byte ip[] = { 192, 168, 0, 130 };                      // sensor's IP address
@@ -40,14 +39,6 @@ int localPort = 8888;                                  // local port to listen o
 // TARGET set this to IP/Port of computer that will receive UDP messages from Arduino
 byte targetIp[] = { 192, 168, 0, 2};
 int targetPort = 6000;
-
-
-#define maxLength 35
-
-// Strings hold the packets we want to send
-String asciiString;  
-String otherString; 
-
 
 void setup() {
   Serial.begin(9600);
@@ -101,7 +92,8 @@ void loop() {
   Serial.print("nfish string: ");
   Serial.println(strNfish);
 
-  asciiString = "action=f2&site=2&sensor=130&nfish=";  
+  // Strings hold the packets we want to send
+  asciiString = "action=f2&site=2&sensor=130&nfish=";  // 34
 
   String otherString = String(maxLength);
 
