@@ -2,6 +2,18 @@
  * Arduino 0016 with Arduino 2009 and Arduino Ethernet Shield
  * configure mac, ip, and router/gw; set target ip and port; send udp string
  * kcw/theliving/2009.07.20
+ *
+ * LIBRARIES REQUIRED:
+ * Ethernet: http://arduino.cc/en/Reference/Ethernet
+ * UDP String: http://bitbucket.org/bjoern/arduino_osc/src/tip/libraries/Ethernet/
+ * WString: http://wiring.org.co/learning/reference/String.html
+ *** must include the following within the String library file WString.h:
+             String(const int length = 16);
+             String(const char* bytes);
+             String(const String &str);
+             ~String() { free(_array); } // <--- add this line  
+ *** adding this line "destructs" the string after each use.  without it, the loop will evetually stop.
+ *** read the forum about it: http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1231346812
  */
 
 #include <Ethernet.h>
@@ -9,14 +21,13 @@
 #include <WString.h>
 
 int analogPin = 4;
-int volume = 0;
-  char str[30];
-  int count; 
 
+int volume = 0;
+int count; 
 
 // ETHERNET CONFIGURATION 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };   // MAC address to use
-byte ip[] = { 192, 168, 0, 3 };                      // Arduino's IP address
+byte ip[] = { 192, 168, 0, 3 };                      // sensor's IP address
 byte gw[] = { 192, 168, 0, 1 };                        // Gateway IP address
 int localPort = 8888;                                  // local port to listen on
 
@@ -24,15 +35,8 @@ int localPort = 8888;                                  // local port to listen o
 byte targetIp[] = { 192, 168, 0, 2};
 int targetPort = 6000;
 
-// Strings hold the packets we want to send
-String asciiString;
-
-
 void setup() {
   Serial.begin(9600);
-  
-  DDRC = 0xff;
-  int nodeID = PINC;
   
   Ethernet.begin(mac,ip,gw);
   UdpString.begin(localPort);
@@ -41,29 +45,33 @@ void setup() {
 
 void loop() {
   
+  Serial.flush();
+  
   volume = analogRead(analogPin);
   count++;
+  Serial.print("count::::::::::::::: ");
+  Serial.println(count);
+  
+  Serial.print("volume int: ");
+  Serial.println(volume);
 
   char strVolume[4];
   itoa (volume, strVolume, 10);
+  
+  Serial.print("volume string: ");
+  Serial.println(strVolume);
 
-  asciiString = "action=f4&site=2&sensor=3&volume=";
+  // Strings hold the packets we want to send
+  String asciiString = "action=f4&site=2&sensor=3&volume=";
+  
+  String otherString;
 
-  strcpy (str, asciiString);
-  strcat (str, strVolume);
- // Serial.println(str);
- 
-  // send a normal, zero-terminated string.
-  String asciiString1 = str;
- UdpString.sendPacket(asciiString1,targetIp,targetPort);
+  otherString.append(asciiString); 
+  otherString.append(strVolume); 
+
+  UdpString.sendPacket(otherString,targetIp,targetPort);
   delay(2000);
 
-  /*
-  // sends a binary string that can contain 0x00 in the middle
-   // you have to specify the length;
-   UdpString.sendPacket(binaryString,binaryString.capacity(),targetIp,targetPort);
-   delay(1000);
-   */
 }
 
 /* end */
