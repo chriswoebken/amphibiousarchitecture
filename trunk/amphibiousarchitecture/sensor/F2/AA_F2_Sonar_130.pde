@@ -93,9 +93,9 @@ void loop() {
   Serial.println(strNfish);
 
   // Strings hold the packets we want to send
-  asciiString = "action=f2&site=2&sensor=130&nfish=";  // 34
+  String asciiString = "action=f2&site=2&sensor=130&nfish=";  // 34
 
-  String otherString = String(maxLength);
+  String otherString;
 
   otherString.append(asciiString); 
   otherString.append(strNfish); 
