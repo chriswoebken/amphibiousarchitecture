@@ -108,7 +108,7 @@ $res22= mysql_query($sql22);
 
 /********************************************* Tell BOH to send a packet to Mac Mini ****/
 
-exec("./../../udpserver/udpsend 70.107.241.104 10069 'action=f1&event=sms'")
+exec("./../../udpserver/udpsend 70.107.241.104 10069 'action=f1&event=sms'");
 
 /******************************************************************************* end ****/
 
