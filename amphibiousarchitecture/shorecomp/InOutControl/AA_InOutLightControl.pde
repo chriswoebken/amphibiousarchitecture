@@ -15,11 +15,11 @@ Serial port;
 //int event;
 
 /****************************************************************************************** UDP ****/
-/*
-//import hypermedia.net.*;
+
+import hypermedia.net.*;
  import processing.serial.*;
  UDP udp;
- */
+ 
 int site = 0;       // these variable get filled in once a udp packet gets received and parsed
 int sensor = 0;     // if any of them remain at zero and get sent to boh, then:
 int volume = 0;     // sensor itself is reading a zero value, which should never happen
@@ -85,16 +85,16 @@ char e; // sms event
 // ---------------------------------------------------------< SET UP >
 void setup() {
 
-  port = new Serial(this, "COM16", 9600);  // -< serial setup >
-  // port = new Serial(this, Serial.list()[0], 9600);  // -< serial setup >
+  //port = new Serial(this, "COM16", 9600);  // -< serial setup >
+  port = new Serial(this, Serial.list()[4], 9600);  // -< serial setup >
 
 
   /***************************************************************************************** UDP ****/
-  /*
+  
   udp = new UDP( this, 6000 );                     // create a new datagram connection on port 6000
-   udp.log( true );                                 // printout the connection activity
-   udp.listen( true );                              // wait for incomming message
-   */
+  udp.log( true );                                 // printout the connection activity
+  udp.listen( true );                              // wait for incomming message
+  
   /***************************************************************************************** END ****/
 
 
@@ -446,13 +446,13 @@ void keyPressed() {
  println("key pressed: " + message);
  }
  }
- */
+*/
 /* ------------------------------------------------- end -- */
 
 
 
 /* ----------------------- do this when you get a packet -- */
-/*
+
 void receive( byte[] data, String ip, int port ) {                  // extended handler
  // void receive( byte[] data ) {                                  // default handler
  
@@ -463,7 +463,7 @@ void receive( byte[] data, String ip, int port ) {                  // extended 
  
  /////////////////// send UDP to BOH ////
  String bohIP = "92.243.23.29";
- int bohPort  = 6000;
+ int bohPort  = 34567;
  udp.send( message, bohIP, bohPort );
  /////////////////////////////// end ////
  
@@ -523,26 +523,8 @@ void receive( byte[] data, String ip, int port ) {                  // extended 
  println();
  /////////////////////////////// end ////
  }
- *
+
 /* ------------------------------------------------- end -- */
 /****************************************************************************************** END ****/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* the end */
