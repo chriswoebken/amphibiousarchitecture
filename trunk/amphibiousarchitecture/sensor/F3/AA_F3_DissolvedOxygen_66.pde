@@ -1,7 +1,8 @@
- /* AA_F3_DissolvedOxygen_66.pde
+/* AA_F3_DissolvedOxygen_66.pde
  * Arduino 0016 with Arduino 2009 and Arduino Ethernet Shield
  * configure mac, ip, and router/gw; set target ip and port; send udp string
  * kcw/theliving/2009.07.20
+ * cw/xclinic/2009.09.03
  *
  * LIBRARIES REQUIRED:
  * Ethernet: http://arduino.cc/en/Reference/Ethernet
@@ -17,7 +18,7 @@
  */
 
 #include <Ethernet.h>
-#include <UdpString.h>
+//#include <UdpString.h>
 #include <WString.h>
 
 #define maxLength 15
@@ -29,7 +30,7 @@ char *temperature [2];
 
 int analogPin = 0;
 char strDissox[4];
-char turnon[3] = "TF";
+char turnon[3] = "DO";
 byte CR = 13;
 char receive[10];
 int incomingByte = 0;
@@ -68,7 +69,7 @@ void loop() {
 
 
 
-  TF();
+  DO();
   delay(4000);
   if (Serial.available() > 0) {
     while (inString.length() < maxLength){
@@ -80,11 +81,11 @@ void loop() {
     } 
   }
 
-  if (inString.charAt(0) == 'T'){
+  if (inString.charAt(0) == 'D'){
 
     char *p = inString;
     for (int j = 0; j <4; j++){
-      myStrings[j] =  strtok_r(p, "°", &p);
+      myStrings[j] =  strtok_r(p, "%", &p); // myStrings[j] =  strtok_r(p, "°", &p);
     }
     char *tempBreak = strtok_r(myStrings[0], "=", &myStrings[0]);
 
@@ -99,14 +100,10 @@ void loop() {
     Serial.print("     "); 
     Serial.print(otherString);
     Serial.print("     ");
-
-   UdpString.sendPacket(otherString,targetIp,targetPort);
-   delay(2000);
-
   }
 
 
- 
+  /* 
    //count++;   
    //  Serial.print("count::::::::::::::: ");
    //  Serial.println(count);   
@@ -117,13 +114,11 @@ void loop() {
    //  Serial.print("dissox string: ");
    //  Serial.println(strDissox);
    // Strings hold the packets we want to send 
-   
-   // UdpString.sendPacket(otherString,targetIp,targetPort);
-   // delay(2000);
-   
+   //  UdpString.sendPacket(otherString,targetIp,targetPort);
+   delay(2000);
    //  Serial.print("sendPacket: ");
    //  Serial.println(otherString);
-
+   */
 
 
   inString = "";
@@ -131,9 +126,7 @@ void loop() {
 
 }
 
-
-
-void TF() {
+void DO() {
   Serial.write(turnon);
   Serial.write(CR); 
 }
