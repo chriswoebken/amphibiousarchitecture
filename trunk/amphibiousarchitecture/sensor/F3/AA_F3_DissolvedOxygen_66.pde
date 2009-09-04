@@ -18,7 +18,7 @@
  */
 
 #include <Ethernet.h>
-//#include <UdpString.h>
+#include <UdpString.h>
 #include <WString.h>
 
 #define maxLength 15
@@ -67,8 +67,6 @@ void loop() {
   Serial.flush();
 
 
-
-
   DO();
   delay(4000);
   if (Serial.available() > 0) {
@@ -84,42 +82,39 @@ void loop() {
   if (inString.charAt(0) == 'D'){
 
     char *p = inString;
-    for (int j = 0; j <4; j++){
+    for (int j = 0; j <4; j++){ 
       myStrings[j] =  strtok_r(p, "%", &p); // myStrings[j] =  strtok_r(p, "°", &p);
     }
-    char *tempBreak = strtok_r(myStrings[0], "=", &myStrings[0]);
+    
+    char *tempBreak = strtok_r(myStrings[0], "=", &myStrings[0]); // tempBreak == DO  --> splitting string at "=" 
+    char *tempBreaknoDec = strtok_r(myStrings[0], ".", &myStrings[0]);// tempBreaknoDec == (DO integer)  --> splitting string at "."
 
 
-    sendTemp = (myStrings[0]);
+    sendTemp = (tempBreaknoDec);
 
-    String asciiString = "action=f3&site=2&sensor=66&dissox=";  // 34
-    String otherString;
 
-    otherString.append(asciiString); 
-    otherString.append(sendTemp);
-    Serial.print("     "); 
-    Serial.print(otherString);
-    Serial.print("     ");
+  //  if (count % 10000 == 0){
+
+      // Strings hold the packets we want to send
+      String asciiString = "action=f3&site=2&sensor=66&dissox=";  // 34
+      String otherString;
+
+      otherString.append(asciiString);
+      otherString.append(sendTemp);
+
+      // add a counter number to each UDP packet.  about 1 packet per second
+      String countString = "&count=";
+
+      otherString.append(countString);
+      otherString.append(count);
+
+      UdpString.sendPacket(otherString,targetIp,targetPort);
+
+  //  }
+
   }
 
-
-  /* 
-   //count++;   
-   //  Serial.print("count::::::::::::::: ");
-   //  Serial.println(count);   
-   //  Serial.print("dissox int: ");
-   //  Serial.println(dissox);   
-   //  char strDissox[4];
-   //  itoa (dissox, strDissox, 10);   
-   //  Serial.print("dissox string: ");
-   //  Serial.println(strDissox);
-   // Strings hold the packets we want to send 
-   //  UdpString.sendPacket(otherString,targetIp,targetPort);
-   delay(2000);
-   //  Serial.print("sendPacket: ");
-   //  Serial.println(otherString);
-   */
-
+  count++;   
 
   inString = "";
   finalStr = "";
