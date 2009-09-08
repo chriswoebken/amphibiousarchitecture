@@ -16,7 +16,7 @@ Serial port;
 
 /****************************************************************************************** UDP ****/
 
-import hypermedia.net.*;
+ import hypermedia.net.*;
  import processing.serial.*;
  UDP udp;
  
@@ -31,7 +31,7 @@ String onoff = "off";
 long count = 0;
 String action;
 String event = "smsoff"; // either "sms" or "smsoff"
-String trackSMS;
+String trackSMS ;
 /****************************************************************************************** END ****/
 
 int counting = 0;
@@ -42,12 +42,13 @@ int oxygen;
 int trackOxygen;
 int flipOx;
 int countDelay = 0;
+int countSmsOx = 0;
 
 // Fish Path variables
 float AbeginX;
 float AbeginY;
-float endX = 570.0;   // Final x-coordinate
-float endY = 320.0;   // Final y-coordinate
+float endX = 800;   // Final x-coordinate
+float endY = 800;   // Final y-coordinate
 float AdistX;          // X-axis distance to move
 float AdistY;          // Y-axis distance to move
 float exponent = 3;   // Determines the curve
@@ -69,7 +70,7 @@ int cols = 4;
 int rows = 4;
 int distbt = 150;
 int cirsize = 30;
-int start = 60;
+int start = 160;
 int flip = 0;
 
 int colorA = 0;
@@ -78,29 +79,31 @@ int colorC = 0;
 String d ;  //ID
 char o;   //dissolved oxygen
 char e; // sms event
- char a = '0';  //ledFixture: top
-      char c = '0';  //ledFixture: bottom
+char a = '0';  //ledFixture: top
+char c = '0';  //ledFixture: bottom
+
 
 
 // ---------------------------------------------------------< SET UP >
 void setup() {
 
-  //port = new Serial(this, "COM16", 9600);  // -< serial setup >
-  port = new Serial(this, Serial.list()[4], 9600);  // -< serial setup >
+ println(Serial.list());
+ // port = new Serial(this, "COM25", 9600);  // -< serial setup >
+ port = new Serial(this, Serial.list()[0], 9600);  // -< serial setup >
 
 
   /***************************************************************************************** UDP ****/
-  
-  udp = new UDP( this, 6000 );                     // create a new datagram connection on port 6000
-  udp.log( true );                                 // printout the connection activity
-  udp.listen( true );                              // wait for incomming message
+ 
+   udp = new UDP( this, 6000 );                     // create a new datagram connection on port 6000
+   udp.log( true );                                 // printout the connection activity
+   udp.listen( true );                              // wait for incomming message
   
   /***************************************************************************************** END ****/
 
 
 
   // -----------------------------------< create display >
-  size(600,600);
+  size(800,800);
   levelTop = new ledFixture[cols][rows];
   levelBot = new ledFixture[cols][rows];
   trackledTop = new char [cols][rows];  
@@ -126,10 +129,10 @@ void draw() {
 
   // -----------------------------------< get variables ready for functions >
 
-  if (dissox > 300 ){
+  if (dissox > 120 ){
     oxygen = 1;
   }
-  if (dissox <= 300){
+  if (dissox <= 120){
     oxygen = 0;
   }
   //oxygen = dissox;
@@ -140,14 +143,16 @@ void draw() {
 
   // -----------------------------------< create a fish path if fish exists >
   //if (countlocal < (fishnumber) && pct == 0 ){//
+  if (counting % 30 == 0){
   if (onoff.equals("on") && pct == 0 ){
     // fish path setup
     fishDist = random(75, 200);
     AbeginX = 0;  
-    AbeginY = random(10,590); 
+    AbeginY = random(50,750); 
     AdistX = endX - AbeginX;
     AdistY = endY - AbeginY;
     FishPath(AbeginX, AbeginY, AdistX, AdistY, fishDist);
+  }
   }
   if (pct > 0){
     FishPath(AbeginX, AbeginY, AdistX, AdistY, fishDist);
@@ -178,7 +183,7 @@ void draw() {
 
       // -----------------------------------< begin message to Arduino >
       levelTop[i][j].FindID();  // determine id based on grid
-     
+
 
 
       if (levelTop[i][j].circolor == 0){ 
@@ -187,24 +192,24 @@ void draw() {
       else if (levelTop[i][j].circolor == 255){
         a ='1';
       }
-     // else {
-     //   a ='0';
-     // }
+      // else {
+      //   a ='0';
+      // }
 
 
       if (levelBot[i][j].circolor == 0){ 
-       
+
         c ='0';
-         if ( i==2 && j==2){
+        if ( i==2 && j==2){
           //print("LED IS = ");
           //println(c);
         }
       }
       else if (levelBot[i][j].circolor == 255){
         c ='1';
-         if ( i==2 && j==2){
-         // print("LED IS = ");
-         // println(c);
+        if ( i==2 && j==2){
+          // print("LED IS = ");
+          // println(c);
         }
       }
       //else {
@@ -229,29 +234,26 @@ void draw() {
 
 
       String[] strsend = { 
-        levelTop[i][j].id , str(c), str(o) , str(e)                                                                                          }; 
+        levelTop[i][j].id , str(c), str(o) , str(e)                                                                                                }; 
       String strDanceID = join(strsend,"");
 
 
       if (trackledTop[i][j] != c ){
-        if ( i==2 && j==2){
+        if ( i==0 && j==0){
           println(strDanceID);
         }
         port.write(strDanceID);
       }
-
-
-
-
       trackledTop[i][j] = c;
-      delay (40);
+      delay (25);
     }
   }
 
 
-  if (trackOxygen != oxygen || trackSMS != event){
+
+  if (trackOxygen != oxygen || trackSMS != event && countSmsOx == 0){
     String[] strsendAll = { 
-      ("22") , ("9"), str(o) , str(e)                                                                                      }; 
+      ("22") , ("9"), str(o) , str(e)                                                                                          }; 
     String strDanceIDAll = join(strsendAll,"");
     port.write(strDanceIDAll);
     print ( "OXYGEN = ");
@@ -260,11 +262,27 @@ void draw() {
     println (event);
   }
 
+
+  if (trackOxygen != oxygen || countSmsOx > 0){
+    countSmsOx++;
+    if (countSmsOx == 10){
+      countSmsOx = 0;
+    }
+  }
+  else {
+    countSmsOx = 0;
+  }
+
   trackSMS = event;
   event = "smsoff";
   trackOxygen = oxygen;
   countDelay++;
   counting++;
+
+
+  //print ("count = ");
+  //println (countSmsOx);
+
 }
 
 
@@ -306,15 +324,23 @@ class ledFixture {
 
   void FishRespond(){
     float distance = dist(x, y, xFishPath, yFishPath);
-    
-    if (distance < fishDist){
+
+    if (distance < fishDist && xFishPath < 650){
       circolor = 255;
       fill(circolor);
       ellipse(x,y,w,h);
     }
-    else {
-    circolor = 0;
+      else {
+      circolor = 0;
+      fill(circolor);
+      ellipse(x,y,w,h);
     }
+   if (xFishPath == 0 || xFishPath == 599){
+      circolor = 0;
+      fill(circolor);
+      ellipse(x,y,w,h);
+    }
+  
   }
 
 
@@ -332,16 +358,16 @@ class ledFixture {
     if(gridx==3 && gridy==3){
       id="03";  
     }
-    if(gridx==0 && gridy==2){
+    if(gridx==3 && gridy==2){
       id="04";  
     }
-    if(gridx==1 && gridy==2){
+    if(gridx==2 && gridy==2){
       id="05";  
     }
-    if(gridx==2 && gridy==2){
+    if(gridx==1 && gridy==2){
       id="06";  
     }
-    if(gridx==3 && gridy==2){
+    if(gridx==0 && gridy==2){
       id="07";  
     }
     if(gridx==0 && gridy==1){
@@ -356,16 +382,16 @@ class ledFixture {
     if(gridx==3 && gridy==1){
       id="11";  
     }
-    if(gridx==0 && gridy==0){
+    if(gridx==3 && gridy==0){
       id="12";  
     }
-    if(gridx==1 && gridy==0){
+    if(gridx==2 && gridy==0){
       id="13";  
     }
-    if(gridx==2 && gridy==0){
+    if(gridx==1 && gridy==0){
       id="14";  
     }
-    if(gridx==3 && gridy ==0){
+    if(gridx==0 && gridy ==0){
       id="15";  
     }
   }
@@ -379,9 +405,9 @@ void FishPath(float beginX, float beginY,  float distX,  float distY, float fish
   if(pct == 0.0){
     beginX = xFishPath;
     beginY = yFishPath;
-    float yRAN = random(10,590);
+    float yRAN = random(10,790);
     endY = int(yRAN);
-    endX = 600;
+    endX = 800;
     distX = endX - beginX;
     distY = endY - beginY;
   }
@@ -446,7 +472,7 @@ void keyPressed() {
  println("key pressed: " + message);
  }
  }
-*/
+ */
 /* ------------------------------------------------- end -- */
 
 
