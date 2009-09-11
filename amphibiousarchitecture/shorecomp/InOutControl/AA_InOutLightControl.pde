@@ -9,17 +9,17 @@
 
 // -----------------------------------< initiate serial processing >
 import processing.serial.*;
-Serial port;
+//Serial port;
 
 //define sensor variables
 //int event;
 
 /****************************************************************************************** UDP ****/
 
- import hypermedia.net.*;
- import processing.serial.*;
- UDP udp;
- 
+import hypermedia.net.*;
+import processing.serial.*;
+UDP udp;
+
 int site = 0;       // these variable get filled in once a udp packet gets received and parsed
 int sensor = 0;     // if any of them remain at zero and get sent to boh, then:
 int volume = 0;     // sensor itself is reading a zero value, which should never happen
@@ -82,22 +82,23 @@ char e; // sms event
 char a = '0';  //ledFixture: top
 char c = '0';  //ledFixture: bottom
 
-
+String ip       = "192.168.0.193";//"92.243.23.29"; //"localhost";                  // the remote IP address
+int port        = 8888; //34567;                                          // the destination port
 
 // ---------------------------------------------------------< SET UP >
 void setup() {
 
- println(Serial.list());
- // port = new Serial(this, "COM25", 9600);  // -< serial setup >
- port = new Serial(this, Serial.list()[0], 9600);  // -< serial setup >
+  println(Serial.list());
+  // port = new Serial(this, "COM25", 9600);  // -< serial setup >
+  //port = new Serial(this, Serial.list()[0], 9600);  // -< serial setup >
 
 
   /***************************************************************************************** UDP ****/
- 
-   udp = new UDP( this, 6000 );                     // create a new datagram connection on port 6000
-   udp.log( true );                                 // printout the connection activity
-   udp.listen( true );                              // wait for incomming message
-  
+
+  udp = new UDP( this, 6000 );                     // create a new datagram connection on port 6000
+  udp.log( true );                                 // printout the connection activity
+  udp.listen( true );                              // wait for incomming message
+
   /***************************************************************************************** END ****/
 
 
@@ -144,15 +145,15 @@ void draw() {
   // -----------------------------------< create a fish path if fish exists >
   //if (countlocal < (fishnumber) && pct == 0 ){//
   if (counting % 30 == 0){
-  if (onoff.equals("on") && pct == 0 ){
-    // fish path setup
-    fishDist = random(75, 200);
-    AbeginX = 0;  
-    AbeginY = random(50,750); 
-    AdistX = endX - AbeginX;
-    AdistY = endY - AbeginY;
-    FishPath(AbeginX, AbeginY, AdistX, AdistY, fishDist);
-  }
+    if (onoff.equals("on") && pct == 0 ){
+      // fish path setup
+      fishDist = random(75, 200);
+      AbeginX = 0;  
+      AbeginY = random(50,750); 
+      AdistX = endX - AbeginX;
+      AdistY = endY - AbeginY;
+      FishPath(AbeginX, AbeginY, AdistX, AdistY, fishDist);
+    }
   }
   if (pct > 0){
     FishPath(AbeginX, AbeginY, AdistX, AdistY, fishDist);
@@ -233,16 +234,26 @@ void draw() {
       }
 
 
-      String[] strsend = { 
-        levelTop[i][j].id , str(c), str(o) , str(e)                                                                                                }; 
-      String strDanceID = join(strsend,"");
 
+
+
+      String[] strsend = { 
+        "#action=f1&site=2&id=",levelTop[i][j].id,"&fishon=", str(c), "&dissox=",str(o),"&event=",str(e), "&end"                         }; 
+      String strDanceID = join(strsend,"");
+      // udp.send( strDanceID, ip, port ); 
+
+      /*
+      String[] strsend = { 
+       levelTop[i][j].id , str(c), str(o) , str(e)                                                                                                }; 
+       String strDanceID = join(strsend,"");
+       */
 
       if (trackledTop[i][j] != c ){
         if ( i==0 && j==0){
           println(strDanceID);
         }
-        port.write(strDanceID);
+        //  port.write(strDanceID);
+        udp.send( strDanceID, ip, port ); 
       }
       trackledTop[i][j] = c;
       delay (25);
@@ -253,9 +264,16 @@ void draw() {
 
   if (trackOxygen != oxygen || trackSMS != event && countSmsOx == 0){
     String[] strsendAll = { 
-      ("22") , ("9"), str(o) , str(e)                                                                                          }; 
+      "#action=f1&site=2&id=","22","fishon=", "9", "&dissox=",str(o),"&event=",str(e), "&end"                   }; 
     String strDanceIDAll = join(strsendAll,"");
-    port.write(strDanceIDAll);
+
+    /*
+    String[] strsendAll = { 
+     ("22") , ("9"), str(o) , str(e)                                                                                          }; 
+     String strDanceIDAll = join(strsendAll,"");
+     */
+    udp.send( strDanceIDAll, ip, port ); 
+    //port.write(strDanceIDAll);
     print ( "OXYGEN = ");
     println (oxygen);
     print ( "EVENT = ");
@@ -330,17 +348,17 @@ class ledFixture {
       fill(circolor);
       ellipse(x,y,w,h);
     }
-      else {
+    else {
       circolor = 0;
       fill(circolor);
       ellipse(x,y,w,h);
     }
-   if (xFishPath == 0 || xFishPath == 599){
+    if (xFishPath == 0 || xFishPath == 599){
       circolor = 0;
       fill(circolor);
       ellipse(x,y,w,h);
     }
-  
+
   }
 
 
@@ -480,77 +498,82 @@ void keyPressed() {
 /* ----------------------- do this when you get a packet -- */
 
 void receive( byte[] data, String ip, int port ) {                  // extended handler
- // void receive( byte[] data ) {                                  // default handler
- 
- // data = subset(data, 0, data.length-1);
- String message = new String( data );
- 
- 
- 
- /////////////////// send UDP to BOH ////
- String bohIP = "92.243.23.29";
- int bohPort  = 34567;
- udp.send( message, bohIP, bohPort );
- /////////////////////////////// end ////
- 
- 
- 
- /////////////////// see the packets ////
- println( "receive: \""+message+"\" from "+ip+" on port "+port );
- 
- String[] list = split(message, "&");                             // split 'message' at each "&"
- // put result in 'list'
- for(int i = 0; i < list.length; i++) {                           // iterate through all of 'list'
- String[] pair = split(list[i], "=");                           // split 'list' at each "="
- 
- if (pair[0].equals("site")) {                                  // if parsed packet (pair[0]) equals tag word that we expect
- site = int(pair[1]);                                         // then set a variable equal to the following value (pair[1])
- }
- else if (pair[0].equals("sensor")) {                           // same as above
- sensor = int(pair[1]);                                       // do it for every tag word we expect to get
- }
- else if (pair[0].equals("volume")) {
- volume = int(pair[1]); 
- }
- else if (pair[0].equals("dissox")) {
- dissox = int(pair[1]); 
- }
- else if (pair[0].equals("nfish")) {
- nfish = int(pair[1]);
- }
- else if (pair[0].equals("weight")) {
- weight = int(pair[1]);
- }
- else if (pair[0].equals("depth")) {
- depth = int(pair[1]);
- }
- else if (pair[0].equals("onoff")) {
- onoff = pair[1];
- }
- else if (pair[0].equals("count")) {
- count = int(pair[1]);
- }
- else if (pair[0].equals("action")) {
- action = pair[1];
- }
- else if (pair[0].equals("event")) {
- event = pair[1];
- }
- 
- }
- 
- println("action = " + action);
- println("volume = " + volume);                                   // monitor how the packet values change
- println("dissox = " + dissox);
- println("event = " + event);
- println("nfish = " + nfish);
- println("nfish on/off = " + onoff);
- println("nfish count = " + count);
- println();
- /////////////////////////////// end ////
- }
+  // void receive( byte[] data ) {                                  // default handler
+
+  // data = subset(data, 0, data.length-1);
+  String message = new String( data );
+
+
+
+  /////////////////// send UDP to BOH ////
+  String bohIP = "92.243.23.29";
+  int bohPort  = 34567;
+  udp.send( message, bohIP, bohPort );
+  /////////////////////////////// end ////
+
+
+
+  /////////////////// see the packets ////
+  println( "receive: \""+message+"\" from "+ip+" on port "+port );
+
+  String[] list = split(message, "&");                             // split 'message' at each "&"
+  // put result in 'list'
+  for(int i = 0; i < list.length; i++) {                           // iterate through all of 'list'
+    String[] pair = split(list[i], "=");                           // split 'list' at each "="
+
+    if (pair[0].equals("site")) {                                  // if parsed packet (pair[0]) equals tag word that we expect
+      site = int(pair[1]);                                         // then set a variable equal to the following value (pair[1])
+    }
+    else if (pair[0].equals("sensor")) {                           // same as above
+      sensor = int(pair[1]);                                       // do it for every tag word we expect to get
+    }
+    else if (pair[0].equals("volume")) {
+      volume = int(pair[1]); 
+    }
+    else if (pair[0].equals("dissox")) {
+      dissox = int(pair[1]); 
+    }
+    else if (pair[0].equals("nfish")) {
+      nfish = int(pair[1]);
+    }
+    else if (pair[0].equals("weight")) {
+      weight = int(pair[1]);
+    }
+    else if (pair[0].equals("depth")) {
+      depth = int(pair[1]);
+    }
+    else if (pair[0].equals("onoff")) {
+      onoff = pair[1];
+    }
+    else if (pair[0].equals("count")) {
+      count = int(pair[1]);
+    }
+    else if (pair[0].equals("action")) {
+      action = pair[1];
+    }
+    else if (pair[0].equals("event")) {
+      println("event recieved");
+      event = pair[1];
+
+    }
+
+  }
+
+  println("action = " + action);
+  println("volume = " + volume);                                   // monitor how the packet values change
+  println("dissox = " + dissox);
+  println("event = " + event);
+  println("nfish = " + nfish);
+  println("nfish on/off = " + onoff);
+  println("nfish count = " + count);
+  println();
+  /////////////////////////////// end ////
+}
+
 
 /* ------------------------------------------------- end -- */
 /****************************************************************************************** END ****/
 
 /* the end */
+
+
