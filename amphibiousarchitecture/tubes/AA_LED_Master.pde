@@ -62,7 +62,7 @@ String udpString (32);
 
 // ETHERNET CONFIGURATION
 byte mac[] = {   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };   // MAC address to use
-byte ip[] = {   192, 168, 0, 193 };                      // LED Master IP address
+byte ip[] = {   192, 168, 0, 192 };                      // LED Master IP address
 byte gw[] = {   192, 168, 0, 1 };                        // Gateway IP address
 int localPort = 8888;                                  // local port to listen on
 
