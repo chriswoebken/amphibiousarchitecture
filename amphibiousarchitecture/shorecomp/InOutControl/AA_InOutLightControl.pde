@@ -82,7 +82,7 @@ char e; // sms event
 char a = '0';  //ledFixture: top
 char c = '0';  //ledFixture: bottom
 
-String ip       = "192.168.0.192";//"92.243.23.29"; //"localhost";                  // the remote IP address
+String ip       = "192.168.0.193";//"92.243.23.29"; //"localhost";                  // the remote IP address
 int port        = 8888; //34567;                                          // the destination port
 
 // ---------------------------------------------------------< SET UP >
@@ -130,10 +130,10 @@ void draw() {
 
   // -----------------------------------< get variables ready for functions >
 
-  if (dissox > 120 ){
+  if (dissox > 100 ){  //////FLIP NUMBER FOR DISSOX *****************************************************
     oxygen = 1;
   }
-  if (dissox <= 120){
+  if (dissox <= 100){
     oxygen = 0;
   }
   //oxygen = dissox;
