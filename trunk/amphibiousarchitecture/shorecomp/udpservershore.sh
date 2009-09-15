@@ -154,6 +154,7 @@ require_once("../boh/udpserver/dbconfig.php");
 $port = $argv[1];
 $addrs = array("127.0.0.1");
 for ($i = 2;  $i < $argc;  ++$i) {
+	
 	$addrs[] = $argv[$i];
 }
 echo("$pid: server starting on port $port with allowed clients "
