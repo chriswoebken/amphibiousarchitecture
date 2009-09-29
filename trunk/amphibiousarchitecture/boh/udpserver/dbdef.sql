@@ -90,8 +90,18 @@ create table f6 (
 	site int not null,
 	sensor int not null,
 	# table-specific columns
-	# don't know what to put here
+	# dont know what to put here
 	dunno int not null
+);
+
+drop table if exists f10;
+create table f10 (
+  `id` int(11) NOT NULL auto_increment,
+  `site` int(11) NOT NULL,
+  `keyword` varchar(20) NOT NULL,
+  `subkeyword` varchar(20) default NULL,
+  `message` varchar(200) NOT NULL,
+  PRIMARY KEY  (`id`)
 );
 
 # end
